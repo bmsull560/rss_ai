@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"crypto/subtle"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -238,5 +239,6 @@ func (m *AuthMiddleware) validateSharedSecret(c echo.Context) bool {
 	}
 
 	providedSecret := c.Request().Header.Get(sharedSecretHeader)
-	return providedSecret == m.sharedSecret
+	// Constant-time comparison to prevent timing attacks on the shared secret.
+	return subtle.ConstantTimeCompare([]byte(providedSecret), []byte(m.sharedSecret)) == 1
 }

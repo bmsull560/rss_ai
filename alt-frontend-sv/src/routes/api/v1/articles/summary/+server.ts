@@ -6,6 +6,7 @@ import type {
 	FetchArticleSummaryResponse,
 } from "$lib/api/client";
 import { validateUrlForSSRF } from "$lib/server/ssrf-validator";
+import { sanitizeArticleHtml } from "$lib/server/sanitize-html";
 
 interface SafeArticleSummaryItem {
 	article_url: string;
@@ -110,14 +111,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			const backendData: FetchArticleSummaryResponse =
 				await backendResponse.json();
 
-			// TODO: Sanitize HTML content for each article
-			// For now, return as-is (sanitization should be added)
+			// Sanitize HTML content for each article (untrusted RSS content is
+			// rendered with {@html} on the client)
 			const sanitizedArticles: SafeArticleSummaryItem[] =
 				backendData.matched_articles.map((article: ArticleSummaryItem) => ({
 					...article,
-					// content: sanitizeForArticle(article.content),
-					// title: extractPlainText(article.title),
-					// author: article.author ? extractPlainText(article.author) : undefined,
+					content: sanitizeArticleHtml(article.content),
 				}));
 
 			const safeResponse: SafeArticleSummaryResponse = {

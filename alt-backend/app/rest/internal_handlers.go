@@ -2,6 +2,7 @@ package rest
 
 import (
 	"alt/di"
+	middleware_custom "alt/middleware"
 	"alt/utils/logger"
 	"net/http"
 
@@ -11,6 +12,10 @@ import (
 func registerInternalRoutes(e *echo.Echo, container *di.ApplicationComponents) {
 	// Internal routes group - restricted access recommended in production (e.g. via network policy)
 	v1 := e.Group("/v1/internal")
+
+	// Service-to-service authentication: callers must present the shared
+	// X-Service-Token (pre-processor sends it from the service_secret file).
+	serviceAuth := middleware_custom.NewServiceAuthMiddleware(logger.Logger)
 
 	v1.GET("/system-user", func(c echo.Context) error {
 		ctx := c.Request().Context()
@@ -30,5 +35,5 @@ func registerInternalRoutes(e *echo.Echo, container *di.ApplicationComponents) {
 		return c.JSON(http.StatusOK, map[string]string{
 			"user_id": userID,
 		})
-	})
+	}, serviceAuth.RequireServiceAuth())
 }

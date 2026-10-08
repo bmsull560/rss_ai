@@ -402,8 +402,11 @@ services:
       - DB_SSL_MODE=prefer
       - LOG_LEVEL=info
       - SERVICE_NAME=pre-processor
+      - ALT_BACKEND_SERVICE_TOKEN_FILE=/run/secrets/service_secret
+      - NEWS_CREATOR_SERVICE_TOKEN_FILE=/run/secrets/service_secret
     secrets:
       - pre_processor_db_password
+      - service_secret
     depends_on:
       db:
         condition: service_healthy

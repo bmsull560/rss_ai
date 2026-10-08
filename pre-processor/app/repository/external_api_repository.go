@@ -180,6 +180,11 @@ func (r *externalAPIRepository) GetSystemUserID(ctx context.Context) (string, er
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
+	// Authenticate with the shared service secret (backend requires X-Service-Token).
+	if r.config.AltService.ServiceToken != "" {
+		req.Header.Set("X-Service-Token", r.config.AltService.ServiceToken)
+	}
+
 	resp, err := r.client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute request: %w", err)
