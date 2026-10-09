@@ -11,11 +11,13 @@ This is the main entry point that wires together all layers:
 - Handler: REST API endpoints
 """
 
+import hmac
 import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from news_creator.config.config import NewsCreatorConfig
 from news_creator.gateway.ollama_gateway import OllamaGateway
@@ -112,6 +114,26 @@ app.include_router(
     create_health_router(container.ollama_gateway),
     tags=["health"]
 )
+
+
+@app.middleware("http")
+async def verify_service_token_middleware(request: Request, call_next):
+    """Require X-Service-Token for all endpoints except health checks.
+
+    The service is exposed on the docker network and a published port, so every
+    caller (e.g. pre-processor) must authenticate with the shared service secret.
+    Fails secure: if the secret is not configured, all non-health requests are rejected.
+    """
+    if request.url.path == "/health":
+        return await call_next(request)
+
+    provided_token = request.headers.get("X-Service-Token", "")
+    expected_token = container.config.service_secret
+    if not expected_token or not hmac.compare_digest(provided_token.encode(), expected_token.encode()):
+        logger.warning("service token authentication failed for path: %s", request.url.path)
+        return JSONResponse(status_code=401, content={"detail": "Invalid or missing service token"})
+
+    return await call_next(request)
 
 
 if __name__ == "__main__":

@@ -122,8 +122,10 @@ func IsAllowedURL(u *url.URL) error {
 	}
 
 	for _, ip := range ips {
-		if ip.IsLoopback() || ip.IsPrivate() {
-			return fmt.Errorf("private IP not allowed: %s", ip.String())
+		// IsPrivate() does not cover link-local ranges (e.g. 169.254.169.254 cloud
+		// metadata) or the unspecified address, so check those explicitly.
+		if ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() || ip.IsUnspecified() {
+			return fmt.Errorf("private or link-local IP not allowed: %s", ip.String())
 		}
 	}
 

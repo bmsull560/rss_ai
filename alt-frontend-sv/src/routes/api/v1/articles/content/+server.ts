@@ -2,6 +2,7 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
 import { getBackendToken } from "$lib/api";
 import { validateUrlForSSRF } from "$lib/server/ssrf-validator";
+import { sanitizeArticleHtml } from "$lib/server/sanitize-html";
 
 interface RequestBody {
 	url: string;
@@ -89,10 +90,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 			const backendData: BackendResponse = await backendResponse.json();
 
-			// TODO: Sanitize HTML content server-side
-			// For now, return as-is (sanitization should be added)
+			// Sanitize HTML content server-side (untrusted RSS content is
+			// rendered with {@html} on the client)
 			const safeResponse: SafeResponse = {
-				content: backendData.content, // sanitizeForArticle(backendData.content),
+				content: sanitizeArticleHtml(backendData.content),
 			};
 
 			return json(safeResponse);

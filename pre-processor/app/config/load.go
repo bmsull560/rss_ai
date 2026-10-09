@@ -180,12 +180,28 @@ func loadFromEnv(config *Config) error {
 		config.NewsCreator.Host = host
 	}
 
+	if token := os.Getenv("NEWS_CREATOR_SERVICE_TOKEN"); token != "" {
+		config.NewsCreator.ServiceToken = token
+	} else if tokenFile := os.Getenv("NEWS_CREATOR_SERVICE_TOKEN_FILE"); tokenFile != "" {
+		if data, readErr := os.ReadFile(tokenFile); readErr == nil {
+			config.NewsCreator.ServiceToken = strings.TrimSpace(string(data))
+		}
+	}
+
 	if apiPath := os.Getenv("NEWS_CREATOR_API_PATH"); apiPath != "" {
 		config.NewsCreator.APIPath = apiPath
 	}
 
 	if host := os.Getenv("ALT_BACKEND_HOST"); host != "" {
 		config.AltService.Host = host
+	}
+
+	if token := os.Getenv("ALT_BACKEND_SERVICE_TOKEN"); token != "" {
+		config.AltService.ServiceToken = token
+	} else if tokenFile := os.Getenv("ALT_BACKEND_SERVICE_TOKEN_FILE"); tokenFile != "" {
+		if data, readErr := os.ReadFile(tokenFile); readErr == nil {
+			config.AltService.ServiceToken = strings.TrimSpace(string(data))
+		}
 	}
 
 	if config.AltService.Timeout, err = parseDurationEnv("ALT_BACKEND_TIMEOUT", config.AltService.Timeout); err != nil {

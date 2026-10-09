@@ -4,6 +4,7 @@ Implements user-specific tag generation with tenant isolation.
 Also runs background tag generation service for batch processing.
 """
 
+import hmac
 import inspect
 import os
 import threading
@@ -392,7 +393,8 @@ def verify_service_token(request: Request) -> None:
         logger.warning("Missing X-Service-Token header")
         raise HTTPException(status_code=401, detail="Missing X-Service-Token header")
 
-    if service_token != expected_token:
+    # Constant-time comparison to prevent timing attacks on the service secret.
+    if not hmac.compare_digest(service_token.encode(), expected_token.encode()):
         logger.warning("Invalid service token provided")
         raise HTTPException(status_code=403, detail="Invalid service token")
 

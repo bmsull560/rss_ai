@@ -4,6 +4,8 @@ import (
 	"alt/config"
 	"alt/di"
 	"alt/domain"
+	middleware_custom "alt/middleware"
+	"alt/utils/logger"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -42,7 +44,8 @@ type UpdateScrapingDomainRequest struct {
 // registerScrapingDomainRoutes registers the scraping domain management routes
 func registerScrapingDomainRoutes(v1 *echo.Group, container *di.ApplicationComponents, cfg *config.Config) {
 	// Admin endpoints (authentication required)
-	admin := v1.Group("/admin")
+	authMiddleware := middleware_custom.NewAuthMiddleware(logger.Logger, cfg.Auth.SharedSecret, cfg)
+	admin := v1.Group("/admin", authMiddleware.RequireAuth())
 	scrapingDomains := admin.Group("/scraping-domains")
 
 	scrapingDomains.GET("", handleListScrapingDomains(container))

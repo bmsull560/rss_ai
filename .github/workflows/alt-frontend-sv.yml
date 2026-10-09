@@ -55,7 +55,7 @@ on:
 jobs:
   test:
     timeout-minutes: 60
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     container:
       image: mcr.microsoft.com/playwright:v1.57.0-jammy

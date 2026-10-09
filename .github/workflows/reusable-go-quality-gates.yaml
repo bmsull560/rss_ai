@@ -30,7 +30,7 @@ permissions:
 
 jobs:
   quality:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     defaults:
       run:

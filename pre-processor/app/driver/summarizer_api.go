@@ -116,6 +116,10 @@ func ArticleSummarizerAPIClient(ctx context.Context, article *models.Article, cf
 		"timeout", cfg.NewsCreator.Timeout)
 
 	req.Header.Set("Content-Type", "application/json")
+	// Authenticate with the shared service secret (news-creator requires X-Service-Token).
+	if cfg.NewsCreator.ServiceToken != "" {
+		req.Header.Set("X-Service-Token", cfg.NewsCreator.ServiceToken)
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -252,6 +256,10 @@ func StreamArticleSummarizerAPIClient(ctx context.Context, article *models.Artic
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	// Authenticate with the shared service secret (news-creator requires X-Service-Token).
+	if cfg.NewsCreator.ServiceToken != "" {
+		req.Header.Set("X-Service-Token", cfg.NewsCreator.ServiceToken)
+	}
 
 	resp, err := streamClient.Do(req)
 	if err != nil {

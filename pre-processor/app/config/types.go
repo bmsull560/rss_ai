@@ -21,6 +21,9 @@ type Config struct {
 type AltServiceConfig struct {
 	Host    string        `json:"host" env:"ALT_BACKEND_HOST" default:"http://alt-backend:8080"`
 	Timeout time.Duration `json:"timeout" env:"ALT_BACKEND_TIMEOUT" default:"10s"`
+	// ServiceToken authenticates calls to alt-backend internal endpoints
+	// (X-Service-Token header). Loaded from env or a docker secret file.
+	ServiceToken string `json:"service_token" env:"ALT_BACKEND_SERVICE_TOKEN"`
 }
 
 type ServerConfig struct {
@@ -88,6 +91,9 @@ type NewsCreatorConfig struct {
 	APIPath string        `json:"api_path" env:"NEWS_CREATOR_API_PATH" default:"/api/v1/summarize"`
 	Model   string        `json:"model" env:"NEWS_CREATOR_MODEL" default:"gemma3:4b"`
 	Timeout time.Duration `json:"timeout" env:"NEWS_CREATOR_TIMEOUT" default:"300s"`
+	// ServiceToken authenticates calls to the news-creator API
+	// (X-Service-Token header). Loaded from env or a docker secret file.
+	ServiceToken string `json:"service_token" env:"NEWS_CREATOR_SERVICE_TOKEN"`
 }
 
 type SummarizeQueueConfig struct {
