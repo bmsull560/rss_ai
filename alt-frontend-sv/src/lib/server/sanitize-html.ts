@@ -55,7 +55,7 @@ function sanitizeAttributes(attrString: string): string {
 		if (name === "style") continue;
 		if (URL_ATTRIBUTES.has(name) && DANGEROUS_URL.test(value)) continue;
 
-		const safeValue = value.replaceAll('"', """);
+		const safeValue = value.replaceAll('"', "&quot;");
 		result += value === "" ? ` ${name}` : ` ${name}="${safeValue}"`;
 	}
 	return result;
